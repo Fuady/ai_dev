@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const GRID_SIZE = 20;
+const GRID_SIZE = 30;
 const CELL_SIZE = 20;
 const INITIAL_SNAKE = [[10, 10]];
 const INITIAL_DIRECTION = { x: 1, y: 0 };
@@ -39,13 +39,16 @@ export default function SnakeGame() {
 
     setSnake(prevSnake => {
       const head = prevSnake[0];
-      const newHead = [head[0] + direction.x, head[1] + direction.y];
+      let newHead = [head[0] + direction.x, head[1] + direction.y];
 
-      if (
-        newHead[0] < 0 || newHead[0] >= GRID_SIZE ||
-        newHead[1] < 0 || newHead[1] >= GRID_SIZE ||
-        prevSnake.some(segment => segment[0] === newHead[0] && segment[1] === newHead[1])
-      ) {
+      // Wrap around borders instead of dying
+      if (newHead[0] < 0) newHead[0] = GRID_SIZE - 1;
+      if (newHead[0] >= GRID_SIZE) newHead[0] = 0;
+      if (newHead[1] < 0) newHead[1] = GRID_SIZE - 1;
+      if (newHead[1] >= GRID_SIZE) newHead[1] = 0;
+
+      // Check collision with self
+      if (prevSnake.some(segment => segment[0] === newHead[0] && segment[1] === newHead[1])) {
         setGameOver(true);
         return prevSnake;
       }
@@ -53,7 +56,7 @@ export default function SnakeGame() {
       const newSnake = [newHead, ...prevSnake];
 
       if (newHead[0] === food[0] && newHead[1] === food[1]) {
-        setScore(s => s + 10);
+        setScore(s => s + 5);
         setFood(generateFood());
       } else {
         newSnake.pop();
@@ -161,7 +164,7 @@ export default function SnakeGame() {
 
         <div className="mt-4 text-center text-gray-700">
           <p className="mb-2">Use arrow keys to move</p>
-          <p className="text-sm">Press SPACE to pause</p>
+          <p className="text-sm">Press SPACE to pause • Snake wraps around borders</p>
         </div>
       </div>
     </div>
