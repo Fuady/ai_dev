@@ -8,26 +8,31 @@ const GAME_SPEED = 150;
 
 export default function SnakeGame() {
   const [snake, setSnake] = useState(INITIAL_SNAKE);
-  const [food, setFood] = useState([15, 15]);
+  const [redFood, setRedFood] = useState([15, 15]);
+  const [blueFood, setBlueFood] = useState([20, 20]);
+  const [greyFood, setGreyFood] = useState([10, 20]);
   const [direction, setDirection] = useState(INITIAL_DIRECTION);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const generateFood = useCallback(() => {
+  const generateFood = useCallback((excludePositions = []) => {
     let newFood;
+    const allPositions = [...snake, ...excludePositions];
     do {
       newFood = [
         Math.floor(Math.random() * GRID_SIZE),
         Math.floor(Math.random() * GRID_SIZE)
       ];
-    } while (snake.some(segment => segment[0] === newFood[0] && segment[1] === newFood[1]));
+    } while (allPositions.some(pos => pos[0] === newFood[0] && pos[1] === newFood[1]));
     return newFood;
   }, [snake]);
 
   const resetGame = () => {
     setSnake(INITIAL_SNAKE);
-    setFood([15, 15]);
+    setRedFood([15, 15]);
+    setBlueFood([20, 20]);
+    setGreyFood([10, 20]);
     setDirection(INITIAL_DIRECTION);
     setGameOver(false);
     setScore(0);
@@ -55,16 +60,29 @@ export default function SnakeGame() {
 
       const newSnake = [newHead, ...prevSnake];
 
-      if (newHead[0] === food[0] && newHead[1] === food[1]) {
+      // Check red food
+      if (newHead[0] === redFood[0] && newHead[1] === redFood[1]) {
         setScore(s => s + 5);
-        setFood(generateFood());
-      } else {
+        setRedFood(generateFood([blueFood, greyFood]));
+      }
+      // Check blue food
+      else if (newHead[0] === blueFood[0] && newHead[1] === blueFood[1]) {
+        setScore(s => s + 10);
+        setBlueFood(generateFood([redFood, greyFood]));
+      }
+      // Check grey food (bad food)
+      else if (newHead[0] === greyFood[0] && newHead[1] === greyFood[1]) {
+        setScore(s => s - 10);
+        setGreyFood(generateFood([redFood, blueFood]));
+      }
+      // No food eaten
+      else {
         newSnake.pop();
       }
 
       return newSnake;
     });
-  }, [direction, food, gameOver, isPaused, generateFood]);
+  }, [direction, redFood, blueFood, greyFood, gameOver, isPaused, generateFood]);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -130,11 +148,34 @@ export default function SnakeGame() {
             />
           ))}
           
+          {/* Red food - 5 points */}
           <div
             className="absolute bg-red-500 rounded-full"
             style={{
-              left: food[0] * CELL_SIZE,
-              top: food[1] * CELL_SIZE,
+              left: redFood[0] * CELL_SIZE,
+              top: redFood[1] * CELL_SIZE,
+              width: CELL_SIZE - 2,
+              height: CELL_SIZE - 2
+            }}
+          />
+
+          {/* Blue food - 10 points */}
+          <div
+            className="absolute bg-blue-500 rounded-full"
+            style={{
+              left: blueFood[0] * CELL_SIZE,
+              top: blueFood[1] * CELL_SIZE,
+              width: CELL_SIZE - 2,
+              height: CELL_SIZE - 2
+            }}
+          />
+
+          {/* Grey food - minus 10 points */}
+          <div
+            className="absolute bg-gray-500 rounded-full"
+            style={{
+              left: greyFood[0] * CELL_SIZE,
+              top: greyFood[1] * CELL_SIZE,
               width: CELL_SIZE - 2,
               height: CELL_SIZE - 2
             }}
@@ -165,6 +206,17 @@ export default function SnakeGame() {
         <div className="mt-4 text-center text-gray-700">
           <p className="mb-2">Use arrow keys to move</p>
           <p className="text-sm">Press SPACE to pause • Snake wraps around borders</p>
+          <div className="flex justify-center gap-4 mt-3 text-sm">
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-red-500 rounded-full inline-block"></span> +5 pts
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-blue-500 rounded-full inline-block"></span> +10 pts
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-gray-500 rounded-full inline-block"></span> -10 pts
+            </span>
+          </div>
         </div>
       </div>
     </div>
