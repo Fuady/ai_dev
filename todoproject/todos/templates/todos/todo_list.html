@@ -1,0 +1,46 @@
+{% extends 'todos/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My TODOs</h2>
+    <a href="{% url 'todo_create' %}" class="btn btn-primary">Add New TODO</a>
+</div>
+
+<div class="btn-group mb-3" role="group">
+    <a href="{% url 'todo_list' %}" class="btn btn-outline-secondary">All</a>
+    <a href="{% url 'todo_list' %}?status=active" class="btn btn-outline-secondary">Active</a>
+    <a href="{% url 'todo_list' %}?status=resolved" class="btn btn-outline-secondary">Resolved</a>
+</div>
+
+{% if todos %}
+    <div class="list-group">
+        {% for todo in todos %}
+        <div class="list-group-item {% if todo.resolved %}resolved{% endif %}">
+            <div class="d-flex w-100 justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <h5 class="mb-1">{{ todo.title }}</h5>
+                    {% if todo.description %}
+                        <p class="mb-1">{{ todo.description }}</p>
+                    {% endif %}
+                    {% if todo.due_date %}
+                        <small class="{% if todo.is_overdue %}overdue{% endif %}">
+                            Due: {{ todo.due_date }}
+                            {% if todo.is_overdue %} (Overdue!){% endif %}
+                        </small>
+                    {% endif %}
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'todo_toggle' todo.pk %}" class="btn btn-sm btn-outline-success">
+                        {% if todo.resolved %}Unmark{% else %}Mark Done{% endif %}
+                    </a>
+                    <a href="{% url 'todo_edit' todo.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="{% url 'todo_delete' todo.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted">No TODOs yet. Create your first one!</p>
+{% endif %}
+{% endblock %}
