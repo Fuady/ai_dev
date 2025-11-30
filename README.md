@@ -10,3 +10,5 @@ This module introduces participants to modern AI development tooling, showing ho
 - Agents: more advanced systems that can operate across files, perform tool-based actions, and automate workflows.
 - Create a snake game based on react using Chatgpt and Cloude
 - Export all folders to Github
+
+## Module 2: End-to-end
