@@ -12,3 +12,5 @@ This module introduces participants to modern AI development tooling, showing ho
 - Export all folders to Github
 
 ## Module 2: End-to-end
+
+- create frontend with loveable.dev
